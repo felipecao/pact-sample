@@ -139,7 +139,7 @@ As previously stated, the consumer is supposed to be "a very simple command-line
 
 These are the classes on the consumer project:
 
-**Main**
+**Main.groovy**
 ```
 package com.github.felipecao.pactsample
 
@@ -157,7 +157,7 @@ class Main {
 }
 ```
 
-**CommandLineInterface**
+**CommandLineInterface.groovy**
 ```
 package com.github.felipecao.pactsample.cli
 
@@ -204,7 +204,7 @@ class CommandLineInterface {
 }
 ```
 
-**StatusClient**
+**StatusClient.groovy**
 ```
 package com.github.felipecao.pactsample.provider
 
