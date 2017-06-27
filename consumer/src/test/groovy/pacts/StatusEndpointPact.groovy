@@ -1,7 +1,6 @@
 package pacts
 
 import org.junit.Test
-import spock.lang.Specification
 
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.groovy.PactBuilder
@@ -15,13 +14,13 @@ class StatusEndpointPact {
 
         statusEndpointPact {
             serviceConsumer "Status CLI" 	        // Define the service consumer by name
-            hasPactWith "Status Endpoint"           // Define the service provider that it has a pact with
-            port 1234                               // The port number for the service. It is optional, leave it out to to use a random one
+            hasPactWith "Status Endpoint"           // Define the service provider that the consumer has a pact with
+            port 1234                               // The port number for the service. It is optional, leave it out to use a random one
 
-            given('status endpoint is up')                      // defines a provider state. It is optional.
-            uponReceiving('a status enquiry')                   // upon_receiving starts a new interaction
-            withAttributes(method: 'get', path: '/status')		// define the request, a GET request to '/mallory'
-            willRespondWith(						            // define the response we want returned
+            given('status endpoint is up')
+            uponReceiving('a status enquiry')
+            withAttributes(method: 'get', path: '/status')
+            willRespondWith(
                     status: 200,
                     headers: ['Content-Type': 'application/json'],
                     body: '{"status":"OK","currentDateTime":"2017-06-27T13:54:29.214"}'
