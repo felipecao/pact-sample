@@ -115,3 +115,4 @@ class StatusEndpointPact {
     }
 }
 ```
+(You'll notice my example has **a lot** in common with the example proposed on https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-consumer-groovy :) )
