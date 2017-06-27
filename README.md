@@ -145,4 +145,4 @@ If you look at https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-consumer-gr
 
 ### step 3: implementing Pact compliance on the producer
 
-Even though it can't be considered a good practice, just for the sake of simplicity, we'll copy the Pact file generated on the consumer project and paste it on the producer project. Please don't tell anyone I gave such a dread example :)
+Even though it can't be considered a good practice, just for the sake of simplicity, we'll copy the Pact file generated on the consumer project and paste it on the producer project. Please don't tell anyone I've given such a dread example :)
