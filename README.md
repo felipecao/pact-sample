@@ -131,6 +131,99 @@ test {
 }
 ```
 
+### step 1.1: making some sense out of consumer needs
+
+It's a bit weird to just define a contract without an use case to back it up, right?
+
+As previously stated, the consumer is supposed to be "a very simple command-line interface that accepts only one command: `status`". So, just to add more context and improving understanding of the consumer needs, the classes below depict what the consumer offers. (Please notice this requires you to go back to `build.gradle` and change `http-builder` to be a `compile` dependency, instead of `testCompile`).
+
+These are the classes on the consumer project:
+
+**Main**
+```
+package com.github.felipecao.pactsample
+
+import com.github.felipecao.pactsample.cli.CommandLineInterface
+import com.github.felipecao.pactsample.provider.StatusClient
+
+class Main {
+    static void main(String[] args) {
+        StatusClient statusClient = new StatusClient()
+        InputStream inputStream = System.in
+        CommandLineInterface cli = new CommandLineInterface(statusClient, inputStream)
+
+        cli.run()
+    }
+}
+```
+
+**CommandLineInterface**
+```
+package com.github.felipecao.pactsample.cli
+
+import com.github.felipecao.pactsample.provider.StatusClient
+
+class CommandLineInterface {
+
+    private static final STATUS_COMMAND = "status"
+
+    private static final QUIT_COMMAND = "quit"
+
+    private StatusClient statusClient
+
+    private InputStream inputStream
+
+    CommandLineInterface(StatusClient statusClient, InputStream inputStream = null) {
+        this.statusClient = statusClient
+        this.inputStream = inputStream ?: System.in
+    }
+
+    void run() {
+        inputStream.withReader {
+            while (true) {
+                String userCommand = readUserInput(it)
+
+                if (userCommand.equalsIgnoreCase(QUIT_COMMAND)) {
+                    System.exit(0)
+                }
+
+                if (!userCommand.equalsIgnoreCase(STATUS_COMMAND)) {
+                    println("Command '${userCommand}' is not supported. Try '${STATUS_COMMAND}' or '${QUIT_COMMAND}' instead.")
+                    continue
+                }
+
+                println(statusClient.retrieveProviderStatus())
+            }
+        }
+    }
+
+    private String readUserInput(Reader reader) {
+        print "Enter command: "
+        return reader.readLine().trim()
+    }
+}
+```
+
+**StatusClient**
+```
+package com.github.felipecao.pactsample.provider
+
+import groovyx.net.http.RESTClient
+
+class StatusClient {
+    private static final String BASE_URL = "http://localhost:8080"
+    private RESTClient restClient
+
+    StatusClient() {
+        this.restClient = new RESTClient(BASE_URL)
+    }
+
+    def retrieveProviderStatus() {
+        restClient.get([path: '/status']).data
+    }
+}
+```
+
 ### step 2: making the Pact available to the producer
 
 After having the Pact contract defined by the consumer, it makes sense to have the producer comply to it, no? So, the next step is having both the consumer and the producer look at the same contract.
