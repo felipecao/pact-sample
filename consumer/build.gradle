@@ -1,0 +1,15 @@
+apply plugin: 'groovy'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.4.11'
+
+    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+    testCompile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7'
+    testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.5.0'
+    testCompile 'au.com.dius:pact-jvm-consumer-junit_2.11:2.1.13'
+}
+
