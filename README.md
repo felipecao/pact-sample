@@ -116,3 +116,7 @@ class StatusEndpointPact {
 }
 ```
 (You'll notice my example has **a lot** in common with the example proposed on https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-consumer-groovy :) )
+
+From this point, you have your first consumer-driven test. To run it, simply right-click the class on your favourite IDE and run it. No need to rely on special fancy Gradle commands, any regular test running mechanism will do.
+
+As soon as you run this test, a new file will be created: `target/Status CLI-Status Endpoint.json`. This file describes the contract both parties should comply with it, along with Pact-specific metadata.
