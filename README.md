@@ -120,3 +120,11 @@ class StatusEndpointPact {
 From this point, you have your first consumer-driven test. To run it, simply right-click the class on your favourite IDE and run it. No need to rely on special fancy Gradle commands, any regular test running mechanism will do.
 
 As soon as you run this test, a new file will be created: `target/Status CLI-Status Endpoint.json`. This file describes the contract both parties should comply with it, along with Pact-specific metadata.
+
+Having something generated under `/target` on a Gradle project sounds rather funky. You can customize this via system properties. Suppose you want generated pacts to be placed under Gradle's regular `/build` folder, or under `/build/pacts`. Just invoke your test using `-Dpact.rootDir="build/pacts"`. Or if you rather have this configured at `build.gradle`, add the following block:
+
+```
+test {
+    systemProperties['pact.rootDir'] = "$buildDir/pacts"
+}
+```

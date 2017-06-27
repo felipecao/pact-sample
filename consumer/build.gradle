@@ -4,6 +4,10 @@ repositories {
     jcenter()
 }
 
+test {
+    systemProperties['pact.rootDir'] = "$buildDir/pacts"
+}
+
 dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.4.11'
     compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7'
