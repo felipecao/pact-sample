@@ -238,4 +238,74 @@ If you look at https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-consumer-gr
 
 ### step 3: implementing Pact compliance on the producer
 
-Even though it can't be considered a good practice, just for the sake of simplicity, we'll copy the Pact file generated on the consumer project and paste it on the producer project. Please don't tell anyone I've given such a dread example :)
+(Even though it can't be considered a good practice, just for the sake of simplicity, we'll copy the Pact file generated on the consumer project and paste it on the producer project. Please don't tell anyone I've given such a dread example :) )
+
+Ok, so now we already know what our producer is supposed to do. Its consumers have said they want a service that responds to `GET` requests at `/status` endpoint. They have also stated they expect the response body to contain two attributes:
+* `status`, which, by the way, is supposed to be a string; and
+* `currentDateTime`, which is supposed to hold a string in `yyyy-MM-ddTHH:mm:ss.XXX` format.
+
+You could take two approaches here: start with the usual TDD cycle (create a test, have it fail, make it work), which would be awesome; or write implementation first. As I'm doing this for the first time, for the sake of simplicity, I'll go with the implementation first.
+
+### step 3.1: writing the production code
+
+To support such needs from consumers, I decided to go with a very simple Spring-Boot app written in Groovy.
+
+This is how `build.gradle` looks like:
+
+```
+buildscript {
+	ext {
+		springBootVersion = '1.5.4.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'groovy'
+apply plugin: 'org.springframework.boot'
+
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	compile('org.springframework.boot:spring-boot-starter-web')
+	compile('org.codehaus.groovy:groovy')
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+```
+
+And this how the controller looks like:
+
+```
+package com.github.felipecao.pactsample.producer
+
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.RestController
+
+import java.time.LocalDateTime
+
+@RestController
+@CrossOrigin
+class StatusController {
+
+    @RequestMapping(value = "/status", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    Map currentStatus() {
+        [status: "OK", currentDateTime: LocalDateTime.now().toString()]
+    }
+}
+```
+
+Very basic stuff, nothing too fancy, the focus here is not on backend code, but rather on complying with the Pact.
