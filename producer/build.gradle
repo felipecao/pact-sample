@@ -31,7 +31,9 @@ repositories {
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.codehaus.groovy:groovy')
+    testCompile('org.codehaus.groovy:groovy-json:2.4.12')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
+	testCompile('org.apache.commons:commons-lang3:3.6')
 }
 
 task startProducer(type: JavaFork) {

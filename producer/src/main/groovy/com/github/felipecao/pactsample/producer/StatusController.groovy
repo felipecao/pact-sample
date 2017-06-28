@@ -16,7 +16,7 @@ class StatusController {
 
     private static final Logger log = LoggerFactory.getLogger(StatusController.class)
 
-    @RequestMapping(value = "/status", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/status", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     Map currentStatus() {
         log.info("New request received!")
         [status: "OK", currentDateTime: LocalDateTime.now().toString()]
