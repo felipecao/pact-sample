@@ -19,7 +19,14 @@
                 },
                 "body": {
                     "status": "OK",
-                    "currentDateTime": "2017-06-28T11:53:16.345"
+                    "currentDateTime": {
+                        "value": "2017-06-28T13:18:29.619",
+                        "matcher": {
+                            "format": "yyyy-MM-dd'T'HH:mm:ss.SSS"
+                        },
+                        "pattern": "yyyy-MM-dd'T'HH:mm:ss.SSS",
+                        "generator": null
+                    }
                 }
             },
             "providerStates": [
