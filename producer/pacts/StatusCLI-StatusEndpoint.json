@@ -19,13 +19,19 @@
                 },
                 "body": {
                     "status": "OK",
-                    "currentDateTime": {
-                        "value": "2017-06-28T13:58:06.843",
-                        "matcher": {
-                            "format": "yyyy-MM-dd'T'HH:mm:ss.SSS"
-                        },
-                        "pattern": "yyyy-MM-dd'T'HH:mm:ss.SSS",
-                        "generator": null
+                    "currentDateTime": "2017-06-28T14:15:45.157"
+                },
+                "matchingRules": {
+                    "body": {
+                        "$.currentDateTime": {
+                            "matchers": [
+                                {
+                                    "match": "timestamp",
+                                    "timestamp": "yyyy-MM-dd'T'HH:mm:ss.SSS"
+                                }
+                            ],
+                            "combine": "AND"
+                        }
                     }
                 }
             },

@@ -5,8 +5,8 @@ import au.com.dius.pact.consumer.groovy.PactBuilder
 import groovyx.net.http.RESTClient
 import org.junit.Test
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import static java.time.LocalDateTime.*
+import static java.time.format.DateTimeFormatter.ofPattern
 import java.time.format.DateTimeParseException
 
 class StatusEndpointPact {
@@ -25,14 +25,11 @@ class StatusEndpointPact {
             given('status endpoint is up')
             uponReceiving('a status enquiry')
             withAttributes(method: 'get', path: '/status')
-            willRespondWith(
-                    status: 200,
-                    headers: ['Content-Type': 'application/json'],
-                    body: [
-                            status: "OK",
-                            currentDateTime: timestamp(DATE_TIME_PATTERN, LocalDateTime.now().toString())
-                    ]
-            )
+            willRespondWith(status: 200, headers: ['Content-Type': 'application/json'])
+            withBody {
+                status "OK"
+                currentDateTime timestamp(DATE_TIME_PATTERN, now().toString())
+            }
         }
 
         // Execute the run method to have the mock server run.
@@ -50,14 +47,13 @@ class StatusEndpointPact {
         assert result == PactVerificationResult.Ok.INSTANCE  // This means it is all good
     }
 
-    private boolean dateTimeMatchesExpectedPattern(def currentDateTime) {
+    private boolean dateTimeMatchesExpectedPattern(String currentDateTime) {
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
-            LocalDateTime.parse(currentDateTime.value, formatter)
-
-            return true
+            parse(currentDateTime, ofPattern(DATE_TIME_PATTERN))
         } catch (DateTimeParseException e) {
             return false
         }
+
+        return true
     }
 }
