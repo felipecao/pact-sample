@@ -3,9 +3,9 @@ A sample project showing how to use [Pact-JVM](https://github.com/DiUS/pact-jvm)
 
 ## the idea
 
-With the increasing popularity of microservices, it can be quite hard to track the impact of a change done to a given service over consumers of this service. Consumers of this service can be other microservices or user interfaces.
+With the increasing popularity of microservices, it can be quite hard to track the impact of a change done to a given service over its consumers. Consumers of this service can be other microservices or user interfaces.
 
-A quite common setting is to have a RESTful Web API acting as a backend component to single-page app, responsible for acting as an UI to the end user. In such a setting, breaking changes can be introduced to the backend without the people responsible for the frontend being aware of it, causing disturbances to the experience provided to user.
+A quite common setting is to have a RESTful Web API acting as a backend component to single-page app, which, in turn, acts as an UI to the end user. In such a setting, breaking changes can be introduced to the backend without the team responsible for the frontend being aware of it, causing disturbances to the experience provided to user.
 
 One way of overcoming this issue is to use [Consumer-Driven Contracts](https://martinfowler.com/articles/consumerDrivenContracts.html). Such technique proposes that the consumer of the information defines a contract between itself and the producer of the information, and both parties should conform to that contract at all times.
 
@@ -123,9 +123,9 @@ class StatusEndpointPact {
 ```
 (You'll notice my example has **a lot** in common with the example proposed on https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-consumer-groovy :) )
 
-From this point, you have your first consumer-driven test. To run it, simply right-click the class on your favourite IDE and run it. No need to rely on special fancy Gradle commands, any regular test running mechanism will do.
+From this point on, you have your first consumer-driven test. To run it, simply right-click the class on your favourite IDE and run it. No need to rely on special fancy Gradle commands, any regular test running mechanism will do, such `./gradlew test`.
 
-As soon as you run this test, a new file will be created: `target/StatusCLI-StatusEndpoint.json`. This file describes the contract both parties should comply with it, along with Pact-specific metadata.
+As soon as you run this test, a new file will be created: `target/StatusCLI-StatusEndpoint.json`. This file describes the contract both parties should comply with, along with Pact-specific metadata.
 
 Having something generated under `/target` on a Gradle project sounds rather funky. You can customize this via system properties. Suppose you want generated pacts to be placed under Gradle's regular `/build` folder, or under `/build/pacts`. Just invoke your test using `-Dpact.rootDir="build/pacts"`. Or if you rather have this configured at `build.gradle`, add the following block:
 
@@ -139,7 +139,7 @@ test {
 
 It's a bit weird to just define a contract without an use case to back it up, right?
 
-As previously stated, the consumer is supposed to be "a very simple command-line interface that accepts only one command: `status`". So, just to add more context and improving understanding of the consumer needs, the classes below depict what the consumer offers. (Please notice this requires you to go back to `build.gradle` and change `http-builder` to be a `compile` dependency, instead of `testCompile`).
+As previously stated, the consumer is supposed to be **a very simple command-line interface that accepts only one command: `status`**. So, just to add more context and improve understanding of the consumer needs, the classes below depict what the consumer offers to the end user. (Please notice this requires you to go back to `build.gradle` and change `http-builder` to be a `compile` dependency, instead of `testCompile`).
 
 These are the classes on the consumer project:
 
@@ -234,7 +234,7 @@ After having the Pact contract defined by the consumer, it makes sense to have t
 
 If you look at https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-consumer-groovy and  https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-junit, there a few ways to implement this:
 
-1. The best approach is to have your contracts available at some kind of broker. https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-consumer-groovy#publishing-your-pact-files-to-a-pact-broker talks a little bit about it. In this setting, as soon as a pact is generated, it's uploaded to Pact broker, from which the producer can afterwards download the same pact and make sure the contract is being complied with. https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-junit#download-pacts-from-a-pact-broker shows how to dowload a Pact file from a broker;
+1. The best approach is to have your contracts available at some kind of broker. https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-consumer-groovy#publishing-your-pact-files-to-a-pact-broker talks a little bit about it. In this setting, as soon as a pact is generated, it's uploaded to Pact broker, from which the producer can afterwards download the same pact and make sure the contract is being complied with. https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-junit#download-pacts-from-a-pact-broker shows how to download a Pact file from a broker;
 
 1. Publish the Pact file somewhere in your network and make it available to both producer and consumer. In this case, you can use either `@PactUrl` or `@PactFolder` annotations to link your producer tests to the contracts;
 
@@ -246,9 +246,9 @@ If you look at https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-consumer-gr
 
 Ok, so now we already know what our producer is supposed to do. Its consumers have said they want a service that responds to `GET` requests at `/status` endpoint. They have also stated they expect the response body to contain two attributes:
 * `status`, which, by the way, is supposed to be a string; and
-* `currentDateTime`, which is supposed to hold a string in `yyyy-MM-ddTHH:mm:ss.XXX` format.
+* `currentDateTime`, which is supposed to hold a string in `yyyy-MM-dd'T'HH:mm:ss.SSS` format.
 
-You could take two approaches here: start with the usual TDD cycle (create a test, have it fail, make it work), which would be awesome; or write implementation first. As I'm doing this for the first time, for the sake of simplicity, I'll go with the implementation first.
+You could take two approaches from here: start with the usual TDD cycle (create a test, have it fail, make it work), which would be awesome; or write implementation first. As I'm doing this for the first time, for the sake of simplicity, I'll go with the implementation first.
 
 ### step 3.1: writing the production code on the consumer side
 
@@ -320,9 +320,9 @@ There are many possible approaches to this task. https://github.com/DiUS/pact-jv
 
 Given the producer service is a Spring-Boot app (which uses Spring MVC under the hood to support HTTP calls), one could say it makes sense to go with [Pact Spring MVC Runner](https://github.com/realestate-com-au/pact-jvm-provider-spring-mvc) for implementing the pact-compliance tests.
 
-What I personally don't like about this approach is the fact that you end up with a unit tests, having controller dependencies mocked, etc. In a real world scenario, where many other components would be acting as consumers to my producer, I'd personally feel more comfortable with having a broader scoped test guaranteeing that everything is fine, so I'll skip Pact Spring MVC Runner for now. (Please notice this is just a personal preference, you should pick whatever makes more sense to your project).
+What I personally don't like about this approach is the fact that you end up with a unit tests, having controller dependencies mocked, etc. In a real world scenario, where many other components would be acting as consumers to my producer, I'd personally feel more comfortable with having a broader scoped test guaranteeing that everything is fine on my service, so I'll skip Pact Spring MVC Runner for now. (Please notice this is just a personal preference, you should pick whatever makes more sense to your project).
 
-Instead, I thought it'd be interesting to go with [Pact Gradle plugin](https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle). In such approach, you'd start your producer, have the pact verification take place and afterwards kill your producer.
+Instead, I thought it'd be interesting to go with [Pact Gradle plugin](https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle). In such approach, you'd start your producer, have the pact verification take place and afterwards kill your producer. You'll go through all layers, from controller all the way to the DB (if you have it) and back. I feel more comfortable with this approach for contract validation.
 
 ### step 4.1: using Pact Gradle plugin to comply with the Pact
 
@@ -361,7 +361,7 @@ pact {
     serviceProviders {
         StatusEndpoint {
             hasPactWith('StatusCLI') {
-                pactFile = file('path/to/producer-consumer-pact.json')
+                pactFile = file('pacts/StatusCLI-StatusEndpoint.json')
             }
         }
     }
@@ -415,7 +415,7 @@ This is especially important considering that:
 * the presented Gradle setup waits 15 seconds before starting the actual pact tests; if those tests were run on the regular CI build, it would really slow down the feedback cycle to everyone on the team;
 * as the application grows and starts taking longer to start, this wait time will need to be adjusted, making the feedback cycle even longer.
 
-On the other hand, it might not always be desirable to have such separation in place. Depending on the situation at hand, your team might prefer having all tests running all together. But you definitely don't want to wait 15 more seconds to obtain feedback from your CI cycle. You already have integration tests running in the middle, and they take long enough.
+On the other hand, it might not always be desirable to have such separation in place. Depending on the situation at hand, your team might prefer having all tests running all together. But you definitely don't want to wait 15 more seconds to obtain feedback from your CI cycle. You already have integration tests running in your test suite, and they take long enough. Waiting longer for feedback shouldn't be an option.
 
 What you can do to have the best of both worlds is use the power of dynamic languages (like Groovy) to read the Pact JSON file and combine its contents with SpringMVC mock  facilities. Think about it: your integration tests already start the container anyway, why restart the container and wait another 15+ seconds to perform Pact validations? Why not just build on top of your existing controller integration tests?
 
