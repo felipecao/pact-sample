@@ -20,7 +20,7 @@
                 "body": {
                     "status": "OK",
                     "currentDateTime": {
-                        "value": "2017-06-28T13:18:29.619",
+                        "value": "2017-06-28T13:58:06.843",
                         "matcher": {
                             "format": "yyyy-MM-dd'T'HH:mm:ss.SSS"
                         },
