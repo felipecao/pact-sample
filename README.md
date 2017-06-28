@@ -1,5 +1,5 @@
 # pact-sample
-A sample project showing how to use Pact to implement consumer-driven tests in Groovy.
+A sample project showing how to use [Pact-JVM](https://github.com/DiUS/pact-jvm) to implement consumer-driven tests and [Consumer-Driven Contracts](https://martinfowler.com/articles/consumerDrivenContracts.html) in Groovy.
 
 ## the idea
 
@@ -17,25 +17,7 @@ You'll notice there are two sub-folders here:
 
 * **producer**: a very basic Spring-Boot service, with just one endpoint (`/status`) that accepts `GET` calls. When a `GET /status` request is issued against this service, a JSON response should be sent back (e.g.: `{"status":"OK","currentDateTime":"2017-06-27T13:54:29.214"}`). Again, very basic, very simple and minimalistic, the focus is not to come up with a super fancy service, but rather to demonstrate how a backend component can comply with a contract defined by its consumers.
 
-## the implementation
-
-This project uses [Pact-JVM](https://github.com/DiUS/pact-jvm), a spin-off from [Pact](https://github.com/realestate-com-au/pact) to implement Consumer-Driven Contracts.
-
-The underlying programming language chosen for both consumer and provider is Groovy.
-
 ## implementing the idea
-
-### references
-
-Before diving into code, I'll paste here the sources of information I've used to implement this example:
-* https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-consumer-groovy
-* http://www.chuanchuanlaw.com/pact-how-to-write-consumer-test/
-* http://www.chuanchuanlaw.com/pact-how-to-write-provider-test/
-* http://dius.com.au/2016/02/03/microservices-pact/
-* https://github.com/mstine/microservices-pact
-* https://github.com/DiUS/pact-workshop-jvm
-* https://github.com/realestate-com-au/pact-jvm-provider-spring-mvc
-* https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-junit
 
 ### step 0: creating the project
 
@@ -571,3 +553,14 @@ class Interactions {
 These classes build on top on Groovy's dynamism to provide an easy-to-read way to parse the Pact file. Combined with SpringMVC's `MockMvc` interface, this is a lightweight approach that reuses Spring-Boot integration tests to also check pacts.
 
 If you like this approach and would consider using it in your team, I'd advise you to be **VERY CAREFUL**, as it usually doesn't pay off to maintain an in-house JSON parsing framework that relies on a 3rd party syntax (in this case, Pact syntax). Parsing Pact's `matchingRules` can be a particularly great PITA.
+
+## references
+These are most of the sources of information I've used to implement this example:
+* https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-consumer-groovy
+* http://www.chuanchuanlaw.com/pact-how-to-write-consumer-test/
+* http://www.chuanchuanlaw.com/pact-how-to-write-provider-test/
+* http://dius.com.au/2016/02/03/microservices-pact/
+* https://github.com/mstine/microservices-pact
+* https://github.com/DiUS/pact-workshop-jvm
+* https://github.com/realestate-com-au/pact-jvm-provider-spring-mvc
+* https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-junit
