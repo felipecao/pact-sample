@@ -58,7 +58,7 @@ dependencies {
     testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
     testCompile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7'
     testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.5.0'
-    testCompile 'au.com.dius:pact-jvm-consumer-junit_2.11:2.1.13'
+    testCompile 'au.com.dius:pact-jvm-consumer-junit_2.11:3.5.0'
 }
 ```
 
@@ -83,9 +83,11 @@ import au.com.dius.pact.consumer.groovy.PactBuilder
 import groovyx.net.http.RESTClient
 import org.junit.Test
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+
+import static java.time.LocalDateTime.now
+import static java.time.LocalDateTime.parse
+import static java.time.format.DateTimeFormatter.ofPattern
 
 class StatusEndpointPact {
 
@@ -103,14 +105,11 @@ class StatusEndpointPact {
             given('status endpoint is up')
             uponReceiving('a status enquiry')
             withAttributes(method: 'get', path: '/status')
-            willRespondWith(
-                    status: 200,
-                    headers: ['Content-Type': 'application/json'],
-                    body: [
-                            status: "OK",
-                            currentDateTime: timestamp(DATE_TIME_PATTERN, LocalDateTime.now().toString())
-                    ]
-            )
+            willRespondWith(status: 200, headers: ['Content-Type': 'application/json'])
+            withBody {
+                status "OK"
+                currentDateTime timestamp(DATE_TIME_PATTERN, now().toString())
+            }
         }
 
         // Execute the run method to have the mock server run.
@@ -128,15 +127,14 @@ class StatusEndpointPact {
         assert result == PactVerificationResult.Ok.INSTANCE  // This means it is all good
     }
 
-    private boolean dateTimeMatchesExpectedPattern(def currentDateTime) {
+    private boolean dateTimeMatchesExpectedPattern(String currentDateTime) {
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
-            LocalDateTime.parse(currentDateTime.value, formatter)
-
-            return true
+            parse(currentDateTime, ofPattern(DATE_TIME_PATTERN))
         } catch (DateTimeParseException e) {
             return false
         }
+
+        return true
     }
 }
 
@@ -425,6 +423,4 @@ Notice Pact Gradle plugin introduces the a few tasks into Gradle lifecyle:
 * `pactVerify`: verifies all configured pacts against the producer;
 * `pactVerify_StatusEndpoint`: only verifies `StatusEndpoint` pact compliance;
 
-To make it simple, we'll just run `./gradlew pactVerify` on the producer project.
-
-And you'll see the test fails with an error message saying something like "$.currentDateTime -> Expected '2017-06-27T13:54:29.214' but received '2017-06-28T11:21:19.436'"
+To make it simple, we'll just run `./gradlew pactVerify` on the producer project, and there you go, you have producer and consumer signing a pact :)
