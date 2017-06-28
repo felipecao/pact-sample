@@ -246,7 +246,7 @@ Ok, so now we already know what our producer is supposed to do. Its consumers ha
 
 You could take two approaches here: start with the usual TDD cycle (create a test, have it fail, make it work), which would be awesome; or write implementation first. As I'm doing this for the first time, for the sake of simplicity, I'll go with the implementation first.
 
-### step 3.1: writing the production code
+### step 3.1: writing the production code on the consumer side
 
 To support such needs from consumers, I decided to go with a very simple Spring-Boot app written in Groovy.
 
@@ -309,3 +309,15 @@ class StatusController {
 ```
 
 Very basic stuff, nothing too fancy, the focus here is not on backend code, but rather on complying with the Pact.
+
+### step 4: complying with the Pact
+
+There are many possible approaches to this task. https://github.com/DiUS/pact-jvm#i-am-writing-a-provider-and-want-to- lists a lot of them.
+
+Given the producer service is a Spring-Boot app (which uses Spring MVC under the hood to support HTTP calls), one could say it makes sense to go with [Pact Spring MVC Runner](https://github.com/realestate-com-au/pact-jvm-provider-spring-mvc) for implementing the pact-compliance tests.
+
+What I personally don't like about this approach is the fact that you end up with a unit tests, having controller dependencies mocked, etc. In a real world scenario, where many other components would be acting as consumers to my producer, I'd personally feel more comfortable with having a broader scoped test guaranteeing that everything is fine, so I'll skip Pact Spring MVC Runner for now. (Please notice this is just a personal preference, you should pick whatever makes more sense to your project).
+
+Instead, I thought it'd be interesting to go with [Pact Gradle plugin](https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle). In such approach, you'd start your producer, have the pact verification take place and afterwards kill your producer.
+
+### step 4.1: using Pact Gradle plugin to comply with the Pact
