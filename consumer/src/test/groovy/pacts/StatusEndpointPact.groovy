@@ -5,9 +5,11 @@ import au.com.dius.pact.consumer.groovy.PactBuilder
 import groovyx.net.http.RESTClient
 import org.junit.Test
 
-import static java.time.LocalDateTime.*
-import static java.time.format.DateTimeFormatter.ofPattern
 import java.time.format.DateTimeParseException
+
+import static java.time.LocalDateTime.now
+import static java.time.LocalDateTime.parse
+import static java.time.format.DateTimeFormatter.ofPattern
 
 class StatusEndpointPact {
 
