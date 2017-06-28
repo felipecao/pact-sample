@@ -1,0 +1,40 @@
+{
+    "provider": {
+        "name": "StatusEndpoint"
+    },
+    "consumer": {
+        "name": "StatusCLI"
+    },
+    "interactions": [
+        {
+            "description": "a status enquiry",
+            "request": {
+                "method": "GET",
+                "path": "/status"
+            },
+            "response": {
+                "status": 200,
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "body": {
+                    "status": "OK",
+                    "currentDateTime": "2017-06-28T11:53:16.345"
+                }
+            },
+            "providerStates": [
+                {
+                    "name": "status endpoint is up"
+                }
+            ]
+        }
+    ],
+    "metadata": {
+        "pact-specification": {
+            "version": "3.0.0"
+        },
+        "pact-jvm": {
+            "version": "3.5.0"
+        }
+    }
+}

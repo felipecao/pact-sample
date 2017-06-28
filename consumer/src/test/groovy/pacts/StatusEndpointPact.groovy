@@ -1,12 +1,17 @@
 package pacts
 
-import org.junit.Test
-
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.groovy.PactBuilder
 import groovyx.net.http.RESTClient
+import org.junit.Test
+
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 class StatusEndpointPact {
+
+    private static final String DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS"
 
     @Test
     void "pact for /status"() {
@@ -23,7 +28,10 @@ class StatusEndpointPact {
             willRespondWith(
                     status: 200,
                     headers: ['Content-Type': 'application/json'],
-                    body: '{"status":"OK","currentDateTime":"2017-06-27T13:54:29.214"}'
+                    body: [
+                            status: "OK",
+                            currentDateTime: timestamp(DATE_TIME_PATTERN, LocalDateTime.now().toString())
+                    ]
             )
         }
 
@@ -36,8 +44,20 @@ class StatusEndpointPact {
             assert response.status == 200
             assert response.contentType == 'application/json'
             assert response.data.status == 'OK'
+            assert dateTimeMatchesExpectedPattern(response.data.currentDateTime)
         }
 
         assert result == PactVerificationResult.Ok.INSTANCE  // This means it is all good
+    }
+
+    private boolean dateTimeMatchesExpectedPattern(def currentDateTime) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
+            LocalDateTime.parse(currentDateTime.value, formatter)
+
+            return true
+        } catch (DateTimeParseException e) {
+            return false
+        }
     }
 }
