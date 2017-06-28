@@ -1,5 +1,7 @@
 package com.github.felipecao.pactsample.producer
 
+import com.github.felipecao.pact.Interactions
+import com.github.felipecao.pact.Pact
 import com.github.felipecao.pact.PactExecutor
 import org.junit.Before
 import org.junit.Test
@@ -27,17 +29,20 @@ class StatusControllerIntegrationTest {
 
     private PactExecutor pactExecutor
 
+    private Interactions interactions
+
     @Autowired
     private WebApplicationContext webApplicationContext
 
     @Before
     void setup() throws Exception {
         this.mockMvc = webAppContextSetup(webApplicationContext).build()
-        this.pactExecutor = new PactExecutor(this.mockMvc, PACT_FILE)
+        this.pactExecutor = new PactExecutor(this.mockMvc)
+        this.interactions = new Interactions(new Pact(PACT_FILE))
     }
 
     @Test
     void "verify status pact"() throws Exception {
-        pactExecutor.verifyInteractionWithDescription("a status enquiry")
+        pactExecutor.verify(interactions.withDescription("a status enquiry"))
     }
 }

@@ -12,15 +12,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class PactExecutor {
     private MockMvc mockMvc
-    private Pact pact
 
-    PactExecutor(MockMvc mockMvc, Path pactFile) {
-        this.pact = new Pact(pactFile)
+    PactExecutor(MockMvc mockMvc) {
         this.mockMvc = mockMvc
     }
 
-    void verifyInteractionWithDescription(String interactionDescription) {
-        def interaction = pact.getInteraction(interactionDescription)
+    void verify(def interaction) {
         def timestampPattern = interaction.response.matchingRules.body.'$.currentDateTime'.matchers[0].timestamp
 
         mockMvc.perform(get(interaction.request.path))

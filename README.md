@@ -424,3 +424,150 @@ Notice Pact Gradle plugin introduces the a few tasks into Gradle lifecyle:
 * `pactVerify_StatusEndpoint`: only verifies `StatusEndpoint` pact compliance;
 
 To make it simple, we'll just run `./gradlew pactVerify` on the producer project, and there you go, you have producer and consumer signing a pact :)
+
+## considerations about continuous integration
+
+The nice thing about using Pact Gradle plugin is that you can quite easily run your Pact verifications on a completely separate CI cycle from your regular tests. You can have your regular unit tests providing fast feedback to the team, and have your pacts automatically checked on your favourite CI tool every once in a while.
+
+This is especially important considering that:
+* the presented Gradle setup waits 15 seconds before starting the actual pact tests; if those tests were run on the regular CI build, it would really slow down the feedback cycle to everyone on the team;
+* as the application grows and starts taking longer to start, this wait time will need to be adjusted, making the feedback cycle even longer.
+
+On the other hand, it might not always be desirable to have such separation in place. Depending on the situation at hand, your team might prefer having all tests running all together. But you definitely don't want to wait 15 more seconds to obtain feedback from your CI cycle. You already have integration tests running in the middle, and they take long enough.
+
+What you can do to have the best of both worlds is use the power of dynamic languages (like Groovy) to read the Pact JSON file and combine its contents with SpringMVC mock  facilities. Think about it: your integration tests already start the container anyway, why restart the container and wait another 15+ seconds to perform Pact validations? Why not just build on top of your existing controller integration tests?
+
+With that in mind, there's a **VERY VERY SIMPLE AND PROTOTYPICAL** (it's important to highlight this point before telling me the code sucks and is full of flaws. It is supposed to be full of flaws :P) proposal in this project to tackle that problem.
+
+Have a look at `StatusControllerIntegrationTest` and the other classes below:
+
+**StatusControllerIntegrationTest.groovy**
+
+```
+package com.github.felipecao.pactsample.producer
+
+import com.github.felipecao.pact.Interactions
+import com.github.felipecao.pact.Pact
+import com.github.felipecao.pact.PactExecutor
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.test.context.web.WebAppConfiguration
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.web.context.WebApplicationContext
+
+import java.nio.file.Path
+import java.nio.file.Paths
+
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@WebAppConfiguration
+class StatusControllerIntegrationTest {
+
+    private static final Path PACT_FILE = Paths.get("pacts", "StatusCLI-StatusEndpoint.json")
+
+    private MockMvc mockMvc
+
+    private PactExecutor pactExecutor
+
+    private Interactions interactions
+
+    @Autowired
+    private WebApplicationContext webApplicationContext
+
+    @Before
+    void setup() throws Exception {
+        this.mockMvc = webAppContextSetup(webApplicationContext).build()
+        this.pactExecutor = new PactExecutor(this.mockMvc)
+        this.interactions = new Interactions(new Pact(PACT_FILE))
+    }
+
+    @Test
+    void "verify status pact"() throws Exception {
+        pactExecutor.verify(interactions.withDescription("a status enquiry"))
+    }
+}
+```
+
+**PactExecutor.groovy**
+```
+package com.github.felipecao.pact
+
+import org.springframework.test.web.servlet.MockMvc
+
+import java.nio.file.Path
+
+import static com.github.felipecao.pact.matcher.TimestampMatcher.matchesPattern
+import static org.hamcrest.Matchers.is
+import static org.hamcrest.core.StringStartsWith.startsWith
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+
+class PactExecutor {
+    private MockMvc mockMvc
+
+    PactExecutor(MockMvc mockMvc) {
+        this.mockMvc = mockMvc
+    }
+
+    void verify(def interaction) {
+        def timestampPattern = interaction.response.matchingRules.body.'$.currentDateTime'.matchers[0].timestamp
+
+        mockMvc.perform(get(interaction.request.path))
+                .andExpect(status().is(interaction.response.status))
+                .andExpect(status().is(interaction.response.status))
+                .andExpect(header().string("Content-Type", startsWith(interaction.response.headers."Content-Type")))
+                .andExpect(jsonPath('$.status').value(is(interaction.response.body.status)))
+                .andExpect(jsonPath('$.currentDateTime').value(matchesPattern(timestampPattern)))
+    }
+
+}
+```
+
+**Pact.groovy**
+```
+package com.github.felipecao.pact
+
+import groovy.json.JsonSlurper
+
+import java.nio.file.Path
+
+class Pact {
+    private def json
+
+    Pact(Path pactFile) {
+        def jsonSlurper = new JsonSlurper()
+        json = jsonSlurper.parse(pactFile.toFile())
+    }
+
+    def findInteraction(String description) {
+        json.interactions.find {it.description == description}
+    }
+}
+```
+
+**Interactions.groovy**
+```
+package com.github.felipecao.pact
+
+class Interactions {
+    private Pact pact
+
+    Interactions(Pact pact) {
+        this.pact = pact
+    }
+
+    def withDescription(String description) {
+        pact.findInteraction(description)
+    }
+}
+```
+
+These classes build on top on Groovy's dynamism to provide an easy-to-read way to parse the Pact file. Combined with SpringMVC's `MockMvc` interface, this is a lightweight approach that reuses Spring-Boot integration tests to also check pacts.
+
+If you like this approach and would consider using it in your team, I'd advise you to be **VERY CAREFUL**, as it usually doesn't pay off to maintain an in-house JSON parsing framework that relies on a 3rd party syntax (in this case, Pact syntax). Parsing Pact's `matchingRules` can be a particularly great PITA.

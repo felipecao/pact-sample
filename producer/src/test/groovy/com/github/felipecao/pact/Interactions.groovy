@@ -8,6 +8,6 @@ class Interactions {
     }
 
     def withDescription(String description) {
-        pact.getInteraction(description)
+        pact.findInteraction(description)
     }
 }

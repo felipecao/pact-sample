@@ -12,7 +12,7 @@ class Pact {
         json = jsonSlurper.parse(pactFile.toFile())
     }
 
-    def getInteraction(String description) {
+    def findInteraction(String description) {
         json.interactions.find {it.description == description}
     }
 }
