@@ -76,19 +76,27 @@ Such expectations should then be clearly stated in the contract to be held betwe
 `StatusEndpointPact.groovy` below depicts how this contract is proposed by the consumer.
 
 ```
-import org.junit.Test
+package pacts
+
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.groovy.PactBuilder
 import groovyx.net.http.RESTClient
+import org.junit.Test
+
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 class StatusEndpointPact {
+
+    private static final String DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS"
 
     @Test
     void "pact for /status"() {
         def statusEndpointPact = new PactBuilder()
 
         statusEndpointPact {
-            serviceConsumer "StatusCLI" 	          // Define the service consumer by name
+            serviceConsumer "StatusCLI" 	        // Define the service consumer by name
             hasPactWith "StatusEndpoint"            // Define the service provider that the consumer has a pact with
             port 1234                               // The port number for the service. It is optional, leave it out to use a random one
 
@@ -98,7 +106,10 @@ class StatusEndpointPact {
             willRespondWith(
                     status: 200,
                     headers: ['Content-Type': 'application/json'],
-                    body: '{"status":"OK","currentDateTime":"2017-06-27T13:54:29.214"}'
+                    body: [
+                            status: "OK",
+                            currentDateTime: timestamp(DATE_TIME_PATTERN, LocalDateTime.now().toString())
+                    ]
             )
         }
 
@@ -111,17 +122,30 @@ class StatusEndpointPact {
             assert response.status == 200
             assert response.contentType == 'application/json'
             assert response.data.status == 'OK'
+            assert dateTimeMatchesExpectedPattern(response.data.currentDateTime)
         }
 
         assert result == PactVerificationResult.Ok.INSTANCE  // This means it is all good
     }
+
+    private boolean dateTimeMatchesExpectedPattern(def currentDateTime) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
+            LocalDateTime.parse(currentDateTime.value, formatter)
+
+            return true
+        } catch (DateTimeParseException e) {
+            return false
+        }
+    }
 }
+
 ```
 (You'll notice my example has **a lot** in common with the example proposed on https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-consumer-groovy :) )
 
 From this point, you have your first consumer-driven test. To run it, simply right-click the class on your favourite IDE and run it. No need to rely on special fancy Gradle commands, any regular test running mechanism will do.
 
-As soon as you run this test, a new file will be created: `target/Status CLI-Status Endpoint.json`. This file describes the contract both parties should comply with it, along with Pact-specific metadata.
+As soon as you run this test, a new file will be created: `target/StatusCLI-StatusEndpoint.json`. This file describes the contract both parties should comply with it, along with Pact-specific metadata.
 
 Having something generated under `/target` on a Gradle project sounds rather funky. You can customize this via system properties. Suppose you want generated pacts to be placed under Gradle's regular `/build` folder, or under `/build/pacts`. Just invoke your test using `-Dpact.rootDir="build/pacts"`. Or if you rather have this configured at `build.gradle`, add the following block:
 
