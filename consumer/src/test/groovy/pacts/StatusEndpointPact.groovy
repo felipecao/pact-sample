@@ -13,8 +13,8 @@ class StatusEndpointPact {
         def statusEndpointPact = new PactBuilder()
 
         statusEndpointPact {
-            serviceConsumer "Status CLI" 	        // Define the service consumer by name
-            hasPactWith "Status Endpoint"           // Define the service provider that the consumer has a pact with
+            serviceConsumer "StatusCLI" 	        // Define the service consumer by name
+            hasPactWith "StatusEndpoint"            // Define the service provider that the consumer has a pact with
             port 1234                               // The port number for the service. It is optional, leave it out to use a random one
 
             given('status endpoint is up')

@@ -1,27 +1,61 @@
+import com.github.jengelman.gradle.plugins.processes.tasks.JavaFork
+
 buildscript {
 	ext {
 		springBootVersion = '1.5.4.RELEASE'
 	}
 	repositories {
-		mavenCentral()
+        jcenter()
+        mavenCentral()
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath("au.com.dius:pact-jvm-provider-gradle_2.11:3.5.0")
+		classpath("com.github.jengelman.gradle.plugins:gradle-processes:0.3.0")
 	}
 }
 
 apply plugin: 'groovy'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'au.com.dius.pact'
+apply plugin: 'com.github.johnrengelman.processes'
 
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
 
 repositories {
-	mavenCentral()
+    jcenter()
+    mavenCentral()
 }
 
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.codehaus.groovy:groovy')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+task startProducer(type: JavaFork) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.github.felipecao.pactsample.producer.Application'
+
+    doLast {
+        Thread.sleep(15000) // time Spring Boot takes to start -- you'll end up with an error saying 'Connection refused' if you don't have this...
+    }
+}
+
+task stopProducer << {
+    startProducer.processHandle.abort()
+}
+
+pact {
+    serviceProviders {
+        StatusEndpoint {
+            startProviderTask = 'startProducer'
+            terminateProviderTask = 'stopProducer'
+            hasPactWith('StatusCLI') {
+                pactFile = file('pacts/StatusCLI-StatusEndpoint.json')
+                // notice the dreadful copy & paste of the Pact file from the consumer project into the producer project.
+            }
+        }
+    }
 }

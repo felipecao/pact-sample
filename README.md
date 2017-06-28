@@ -88,8 +88,8 @@ class StatusEndpointPact {
         def statusEndpointPact = new PactBuilder()
 
         statusEndpointPact {
-            serviceConsumer "Status CLI" 	          // Define the service consumer by name
-            hasPactWith "Status Endpoint"           // Define the service provider that the consumer has a pact with
+            serviceConsumer "StatusCLI" 	          // Define the service consumer by name
+            hasPactWith "StatusEndpoint"            // Define the service provider that the consumer has a pact with
             port 1234                               // The port number for the service. It is optional, leave it out to use a random one
 
             given('status endpoint is up')
@@ -321,3 +321,86 @@ What I personally don't like about this approach is the fact that you end up wit
 Instead, I thought it'd be interesting to go with [Pact Gradle plugin](https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle). In such approach, you'd start your producer, have the pact verification take place and afterwards kill your producer.
 
 ### step 4.1: using Pact Gradle plugin to comply with the Pact
+
+We're going to use 2 plugins to help achieving our goal:
+* the aforementioned [Pact Gradle plugin](https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle), together with
+* [Gradle process plugin](https://github.com/johnrengelman/gradle-processes), which takes care of forking and keeping references to processes started within our build;
+
+This is how the top part of `build.gradle` looks like after adding the plugins:
+
+```
+buildscript {
+	ext {
+		springBootVersion = '1.5.4.RELEASE'
+	}
+	repositories {
+        jcenter()
+        mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath("au.com.dius:pact-jvm-provider-gradle_2.11:3.5.0")
+		classpath("com.github.jengelman.gradle.plugins:gradle-processes:0.3.0")
+	}
+}
+
+apply plugin: 'groovy'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'au.com.dius.pact'
+apply plugin: 'com.github.johnrengelman.processes'
+```
+
+Pact plugin configuration is pretty straightforward, the most basic configuration you'd need is:
+
+```
+pact {
+    serviceProviders {
+        StatusEndpoint {
+            hasPactWith('StatusCLI') {
+                pactFile = file('path/to/producer-consumer-pact.json')
+            }
+        }
+    }
+}
+```
+
+In our case, we want to start our producer Spring-Boot app and have the Pact being checked against it, and that's where `gradle-processes` comes in handy. We're going to use it to start and stop the service:
+
+```
+task startProducer(type: JavaFork) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.github.felipecao.pactsample.producer.Application'
+
+    doLast {
+        Thread.sleep(15000) // time Spring Boot takes to start -- you'll end up with an error saying 'Connection refused' if you don't have this...
+    }
+}
+
+task stopProducer << {
+    startProducer.processHandle.abort()
+}
+
+pact {
+    serviceProviders {
+        StatusEndpoint {
+            startProviderTask = 'startProducer'
+            terminateProviderTask = 'stopProducer'
+            hasPactWith('StatusCLI') {
+                pactFile = file('pacts/StatusCLI-StatusEndpoint.json')
+                // notice the dreadful copy & paste of the Pact file from the consumer project into the producer project.
+            }
+        }
+    }
+}
+```
+
+And that's it, we already have everything in place to check if our producer matches our consumer expectations.
+
+Notice Pact Gradle plugin introduces the a few tasks into Gradle lifecyle:
+* `pactPublish`: used to push all pact files in a directory to a pact broker (see https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle#publishing-pact-files-to-a-pact-broker-version-227);
+* `pactVerify`: verifies all configured pacts against the producer;
+* `pactVerify_StatusEndpoint`: only verifies `StatusEndpoint` pact compliance;
+
+To make it simple, we'll just run `./gradlew pactVerify` on the producer project.
+
+And you'll see the test fails with an error message saying something like "$.currentDateTime -> Expected '2017-06-27T13:54:29.214' but received '2017-06-28T11:21:19.436'"
