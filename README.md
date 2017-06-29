@@ -57,7 +57,7 @@ Such expectations should then be clearly stated in the contract to be held betwe
 
 `StatusEndpointPact.groovy` below depicts how this contract is proposed by the consumer.
 
-```
+```groovy
 package pacts
 
 import au.com.dius.pact.consumer.PactVerificationResult
@@ -144,7 +144,7 @@ As previously stated, the consumer is supposed to be **a very simple command-lin
 These are the classes on the consumer project:
 
 **Main.groovy**
-```
+```groovy
 package com.github.felipecao.pactsample
 
 import com.github.felipecao.pactsample.cli.CommandLineInterface
@@ -162,7 +162,7 @@ class Main {
 ```
 
 **CommandLineInterface.groovy**
-```
+```groovy
 package com.github.felipecao.pactsample.cli
 
 import com.github.felipecao.pactsample.provider.StatusClient
@@ -209,7 +209,7 @@ class CommandLineInterface {
 ```
 
 **StatusClient.groovy**
-```
+```groovy
 package com.github.felipecao.pactsample.provider
 
 import groovyx.net.http.RESTClient
@@ -288,7 +288,7 @@ dependencies {
 
 And this how the controller looks like:
 
-```
+```groovy
 package com.github.felipecao.pactsample.producer
 
 import org.slf4j.Logger
@@ -425,7 +425,7 @@ Have a look at `StatusControllerIntegrationTest` and the other classes below:
 
 **StatusControllerIntegrationTest.groovy**
 
-```
+```groovy
 package com.github.felipecao.pactsample.producer
 
 import com.github.felipecao.pact.Interactions
@@ -477,7 +477,7 @@ class StatusControllerIntegrationTest {
 ```
 
 **PactExecutor.groovy**
-```
+```groovy
 package com.github.felipecao.pact
 
 import org.springframework.test.web.servlet.MockMvc
@@ -512,7 +512,7 @@ class PactExecutor {
 ```
 
 **Pact.groovy**
-```
+```groovy
 package com.github.felipecao.pact
 
 import groovy.json.JsonSlurper
@@ -534,7 +534,7 @@ class Pact {
 ```
 
 **Interactions.groovy**
-```
+```groovy
 package com.github.felipecao.pact
 
 class Interactions {
