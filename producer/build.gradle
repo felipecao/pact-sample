@@ -56,7 +56,9 @@ pact {
             terminateProviderTask = 'stopProducer'
             hasPactWith('StatusCLI') {
                 pactFile = file('pacts/StatusCLI-StatusEndpoint.json')
-                // notice the dreadful copy & paste of the Pact file from the consumer project into the producer project.
+            }
+            hasPactWith('StatusFrontEnd') {
+                pactFile = file('pacts/statusfrontend-statusendpoint.json')
             }
         }
     }
