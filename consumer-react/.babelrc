@@ -1,0 +1,21 @@
+{
+  "presets": ["es2015", "react"],
+  "plugins": [
+    "transform-async-to-generator",
+    "transform-object-rest-spread"
+  ],
+  "env": {
+    "development": {
+      "plugins": []
+    },
+    "production": {
+      "plugins": ["transform-react-remove-prop-types"]
+    },
+    "test": {
+      "plugins": ["istanbul"]
+    },
+    "pacts": {
+      "plugins": []
+    }
+  }
+}
