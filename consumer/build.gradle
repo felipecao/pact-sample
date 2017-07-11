@@ -1,4 +1,14 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath("au.com.dius:pact-jvm-provider-gradle_2.11:3.5.0")
+    }
+}
+
 apply plugin: 'groovy'
+apply plugin: 'au.com.dius.pact'
 
 repositories {
     jcenter()
@@ -17,3 +27,11 @@ dependencies {
     testCompile 'au.com.dius:pact-jvm-consumer-junit_2.11:3.5.0'
 }
 
+pact {
+    publish {
+        pactBrokerUrl = 'https://test.pact.dius.com.au/'
+        pactBrokerUsername = 'dXfltyFMgNOFZAxr8io9wJ37iUpY42M'
+        pactBrokerPassword = 'O5AIZWxelWbLvqMd8PkAVycBJh2Psyg1'
+        version = '3.5.0'
+    }
+}
