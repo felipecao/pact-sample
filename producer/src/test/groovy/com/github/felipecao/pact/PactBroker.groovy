@@ -1,5 +1,6 @@
 package com.github.felipecao.pact
 
+import au.com.dius.pact.model.Pact
 import au.com.dius.pact.provider.junit.loader.PactBrokerLoader
 
 class PactBroker {

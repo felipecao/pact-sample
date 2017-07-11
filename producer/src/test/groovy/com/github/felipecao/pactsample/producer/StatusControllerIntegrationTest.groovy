@@ -1,6 +1,6 @@
 package com.github.felipecao.pactsample.producer
 
-import com.github.felipecao.pact.Pact
+import au.com.dius.pact.model.Pact
 import com.github.felipecao.pact.PactBroker
 import com.github.felipecao.pact.PactsVerifier
 import org.junit.Before
