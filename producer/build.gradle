@@ -54,12 +54,9 @@ pact {
         StatusEndpoint {
             startProviderTask = 'startProducer'
             terminateProviderTask = 'stopProducer'
-            hasPactWith('StatusCLI') {
-                pactFile = file('pacts/StatusCLI-StatusEndpoint.json')
-            }
-            hasPactWith('StatusFrontEnd') {
-                pactFile = file('pacts/statusfrontend-statusendpoint.json')
-            }
+            hasPactsFromPactBroker(pactBrokerUrl,
+                    authentication: ['Basic', pactBrokerUser, pactBrokerPassword]
+            )
         }
     }
 }
