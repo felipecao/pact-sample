@@ -7,8 +7,8 @@ buildscript {
     }
 }
 
-apply plugin: 'groovy'
 apply plugin: 'au.com.dius.pact'
+apply plugin: 'groovy'
 
 repositories {
     jcenter()
