@@ -121,7 +121,7 @@ class StatusEndpointPact {
 }
 
 ```
-(You'll notice my example has **a lot** in common with the example proposed on https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-consumer-groovy :) )
+(You'll notice my example has **a lot** in common with the example proposed on https://github.com/DiUS/pact-jvm/tree/master/consumer/pact-jvm-consumer-groovy :) )
 
 From this point on, you have your first consumer-driven test. To run it, simply right-click the class on your favourite IDE and run it. No need to rely on special fancy Gradle commands, any regular test running mechanism will do, such `./gradlew test`.
 
@@ -232,9 +232,9 @@ class StatusClient {
 
 After having the Pact contract defined by the consumer, it makes sense to have the producer comply to it, no? So, the next step is having both the consumer and the producer look at the same contract.
 
-If you look at https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-consumer-groovy and  https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-junit, there a few ways to implement this:
+If you look at https://github.com/DiUS/pact-jvm/tree/master/consumer/pact-jvm-consumer-groovy and  https://github.com/DiUS/pact-jvm/tree/master/provider/pact-jvm-provider-junit, there a few ways to implement this:
 
-1. The best approach is to have your contracts available at some kind of broker. https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-consumer-groovy#publishing-your-pact-files-to-a-pact-broker talks a little bit about it. In this setting, as soon as a pact is generated, it's uploaded to Pact broker, from which the producer can afterwards download the same pact and make sure the contract is being complied with. https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-junit#download-pacts-from-a-pact-broker shows how to download a Pact file from a broker;
+1. The best approach is to have your contracts available at some kind of broker. https://github.com/DiUS/pact-jvm/tree/master/consumer/pact-jvm-consumer-groovy#publishing-your-pact-files-to-a-pact-broker talks a little bit about it. In this setting, as soon as a pact is generated, it's uploaded to Pact broker, from which the producer can afterwards download the same pact and make sure the contract is being complied with. https://github.com/DiUS/pact-jvm/tree/master/provider/pact-jvm-provider-junit#download-pacts-from-a-pact-broker shows how to download a Pact file from a broker;
 
 1. Publish the Pact file somewhere in your network and make it available to both producer and consumer. In this case, you can use either `@PactUrl` or `@PactFolder` annotations to link your producer tests to the contracts;
 
@@ -322,12 +322,12 @@ Given the producer service is a Spring-Boot app (which uses Spring MVC under the
 
 What I personally don't like about this approach is the fact that you end up with a unit tests, having controller dependencies mocked, etc. In a real world scenario, where many other components would be acting as consumers to my producer, I'd personally feel more comfortable with having a broader scoped test guaranteeing that everything is fine on my service, so I'll skip Pact Spring MVC Runner for now. (Please notice this is just a personal preference, you should pick whatever makes more sense to your project).
 
-Instead, I thought it'd be interesting to go with [Pact Gradle plugin](https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle). In such approach, you'd start your producer, have the pact verification take place and afterwards kill your producer. You'll go through all layers, from controller all the way to the DB (if you have it) and back. I feel more comfortable with this approach for contract validation.
+Instead, I thought it'd be interesting to go with [Pact Gradle plugin](https://github.com/DiUS/pact-jvm/tree/master/provider/pact-jvm-provider-gradle). In such approach, you'd start your producer, have the pact verification take place and afterwards kill your producer. You'll go through all layers, from controller all the way to the DB (if you have it) and back. I feel more comfortable with this approach for contract validation.
 
 ### step 4.1: using Pact Gradle plugin to comply with the Pact
 
 We're going to use 2 plugins to help achieving our goal:
-* the aforementioned [Pact Gradle plugin](https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle), together with
+* the aforementioned [Pact Gradle plugin](https://github.com/DiUS/pact-jvm/tree/master/provider/pact-jvm-provider-gradle), together with
 * [Gradle process plugin](https://github.com/johnrengelman/gradle-processes), which takes care of forking and keeping references to processes started within our build;
 
 This is how the top part of `build.gradle` looks like after adding the plugins:
@@ -401,7 +401,7 @@ pact {
 And that's it, we already have everything in place to check if our producer matches our consumer expectations.
 
 Notice Pact Gradle plugin introduces the a few tasks into Gradle lifecyle:
-* `pactPublish`: used to push all pact files in a directory to a pact broker (see https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle#publishing-pact-files-to-a-pact-broker-version-227);
+* `pactPublish`: used to push all pact files in a directory to a pact broker (see https://github.com/DiUS/pact-jvm/tree/master/provider/pact-jvm-provider-gradle#publishing-pact-files-to-a-pact-broker-version-227);
 * `pactVerify`: verifies all configured pacts against the producer;
 * `pactVerify_StatusEndpoint`: only verifies `StatusEndpoint` pact compliance;
 
@@ -556,11 +556,11 @@ If you like this approach and would consider using it in your team, I'd advise y
 
 ## references
 These are most of the sources of information I've used to implement this example:
-* https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-consumer-groovy
+* https://github.com/DiUS/pact-jvm/tree/master/consumer/pact-jvm-consumer-groovy
 * http://www.chuanchuanlaw.com/pact-how-to-write-consumer-test/
 * http://www.chuanchuanlaw.com/pact-how-to-write-provider-test/
-* http://dius.com.au/2016/02/03/microservices-pact/
+* https://dius.com.au/2016/02/03/pact-101--getting-started-with-pact-and-consumer-driven-contract-testing/
 * https://github.com/mstine/microservices-pact
 * https://github.com/DiUS/pact-workshop-jvm
 * https://github.com/realestate-com-au/pact-jvm-provider-spring-mvc
-* https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-junit
+* https://github.com/DiUS/pact-jvm/tree/master/provider/pact-jvm-provider-junit
